@@ -33,7 +33,7 @@ import static org.bsc.langgraph4j.GraphDefinition.START;
  * @description ReAct 配置
  */
 @Configuration
-public class ReactAgentConfig {
+public class ReActAgentConfig {
 
     private static final Set<String> SENSITIVE_TOOLS = Set.of(
             "createTicket"   // 危险工具名单
