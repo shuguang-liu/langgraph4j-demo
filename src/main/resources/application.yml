@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: langgraph4j-demo
+  DataSource:
+    url: jdbc:postgresql://192.168.42.128:15432/ai_demo
+    username: postgres
+    password: ${DB_PASSWORD}
+  ai:
+    openai:
+      api-key: ${DASHSCOPE_API_KEY}
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      chat:
+        options:
+          model: qwen3.8-2.4t-a95b
+          extra-body:
+            enable_thinking: false
+      embedding:
+        options:
+          model: qwen3.7-text-embedding-flash
+          # sk-vvipvgourebzpveaaqrqilgkpxtitlnlhobbuvjxazyydevq
+    vectorstore:
+      pgvector:
+        index-type: hnsw
+        distance-type: cosine_distance
+        dimensions: 1024
+        initialize-schema: true
+logging:
+  level:
+    org.springframework.ai: DEBUG
