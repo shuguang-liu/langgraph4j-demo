@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.example</groupId>
     <artifactId>langgraph4j-demo</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>langgraph4j-demo</name>
     <description>langgraph4j-demo</description>
     <url/>
@@ -51,9 +51,33 @@
             <artifactId>spring-ai-starter-model-openai</artifactId>
         </dependency>
 
+        <!-- 多数据源：JDBC + PostgreSQL（primary=AI 主库，auth=登录鉴权库） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Redis：token 服务端存储（可吊销/重启不丢） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+        </dependency>
+
+        <!-- SM4 国密算法实现（token 加密） -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.81</version>
         </dependency>
 <!--        <dependency>-->
 <!--            <groupId>com.alibaba.cloud.ai</groupId>-->

@@ -67,7 +67,7 @@ public class AgenticRagConfig {
 
             System.out.println("[retrieve] 调用 RAG 服务: " + question);
             String context = restTemplate.getForObject(
-                    "http://localhost:9092/api/chat/ask?question=" +
+                    "http://127.0.0.1:19092/api/chat/ask?question=" +
                             URLEncoder.encode(question, StandardCharsets.UTF_8),
                     String.class);
 

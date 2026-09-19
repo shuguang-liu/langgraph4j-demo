@@ -62,8 +62,6 @@ public class MultiAgentConfig {
                     .reduce((a, b) -> b)
                     .map(Message::getText)
                     .orElse("");
-
-            String question = messages.get(0).getText();
             String prompt = """
                     你是任务分配主管。根据用户问题，决定交给哪个专家处理。
                     
@@ -76,10 +74,17 @@ public class MultiAgentConfig {
                     只输出一个词：cs / tech / data / end
                     
                     用户问题：%s
-                    """.formatted(question);
+                    """.formatted(latestQuestion);
             String decision = chatClient.prompt().user(prompt).call().content().trim().toLowerCase();
             System.out.println("[supervisor] 分配给: " + decision);
-            return Map.of("next", decision);
+            // 一轮专家回复都没有时，"end" 会直接产出空回答——兜底改派客服专家
+            boolean hasAssistantReply = messages.stream().anyMatch(m -> m instanceof AssistantMessage);
+            if ("end".equals(decision) && !hasAssistantReply) {
+                System.out.println("[supervisor] 首轮无专家回复，end 改派 cs");
+                decision = "cs";
+            }
+            // 关键：同时记录当前Agent，供 backToExpert 使用
+            return Map.of("next", decision, "current_expert", decision);
         };
     }
 
@@ -89,8 +94,34 @@ public class MultiAgentConfig {
     }
 
     @Bean
-    public NodeAction<MultiAgentState> techExpertNode(@Qualifier("techChatClient") ChatClient chatClient, CustomerServiceTools tools) {
-        return buildExpertNode(chatClient, tools, "tech_expert");
+    public NodeAction<MultiAgentState> techExpertNode(
+            RestTemplate restTemplate) {   // ← 不需要 ChatClient
+        return state -> {
+            System.out.println("[tech_expert] 转发到 RAG 服务...");
+            List<Message> messages = state.message();
+            String question = messages.stream()
+                    .filter(m -> m instanceof UserMessage)
+                    .reduce((a, b) -> b)
+                    .map(Message::getText)
+                    .orElse("");
+
+            // 直接调 RAG 服务，拿完整回答
+            String answer;
+            try {
+                String url = "http://127.0.0.1:19092/api/chat/ordinaryAsk?question="
+                        + URLEncoder.encode(question, StandardCharsets.UTF_8);
+                answer = restTemplate.getForObject(url, String.class);
+                System.out.println("[tech_expert] RAG 返回: "
+                        + (answer != null && answer.length() > 100 ? answer.substring(0, 100) + "..." : answer));
+            } catch (Exception e) {
+                System.err.println("[tech_expert] 调用 RAG 失败: " + e.getMessage());
+                answer = "抱歉，知识库服务暂时不可用。";
+            }
+
+            List<Message> newMessages = new ArrayList<>(messages);
+            newMessages.add(new AssistantMessage(answer));
+            return Map.of("message", newMessages);
+        };
     }
 
     @Bean

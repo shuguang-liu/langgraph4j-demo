@@ -18,7 +18,12 @@ public class MultiAgentChatClient {
 
     @Bean("csChatClient")
     public ChatClient csChatClient(ChatClient.Builder builder){
-        return builder.defaultSystem("你是专业的电商客服助手，处理订单、物流、退款问题。").build();
+        return builder.defaultSystem("""
+                你是电商客服专家，处理订单、物流、退款、工单等问题。
+                用户问订单时，必须调用 queryOrder 工具。
+                用户问物流时，必须调用 queryLogistics 工具。
+                用户要退款/投诉时，必须调用 createTicket 工具。
+                """).build();
     }
 
     @Bean("techChatClient")
@@ -28,7 +33,7 @@ public class MultiAgentChatClient {
 
     @Bean("dataChatClient")
     public ChatClient dataChatClient(ChatClient.Builder builder){
-        return builder.defaultSystem("你是报表生成专家，回答 报表 相关问题。").build();
+        return builder.defaultSystem("你是数据分析师，基于提供的统计数据生成简洁的报表总结。").build();
     }
 
 }

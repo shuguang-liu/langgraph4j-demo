@@ -1,0 +1,8 @@
+{
+  "appId": "com.liushug.langgraph4j",
+  "appName": "刘曙光 · AI Agent 工作台",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": true
+  }
+}

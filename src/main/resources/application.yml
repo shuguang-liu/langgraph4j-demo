@@ -1,29 +1,26 @@
 spring:
   application:
     name: langgraph4j-demo
-  DataSource:
-    url: jdbc:postgresql://192.168.42.128:15432/ai_demo
-    username: postgres
-    password: ${DB_PASSWORD}
-  ai:
-    openai:
-      api-key: ${DASHSCOPE_API_KEY}
-      base-url: https://dashscope.aliyuncs.com/compatible-mode
-      chat:
-        options:
-          model: qwen3.8-2.4t-a95b
-          extra-body:
-            enable_thinking: false
-      embedding:
-        options:
-          model: qwen3.7-text-embedding-flash
-          # sk-vvipvgourebzpveaaqrqilgkpxtitlnlhobbuvjxazyydevq
-    vectorstore:
-      pgvector:
-        index-type: hnsw
-        distance-type: cosine_distance
-        dimensions: 1024
-        initialize-schema: true
+  profiles:
+    active: dev
+server:
+  port: 19091
+  address: 0.0.0.0
 logging:
   level:
     org.springframework.ai: DEBUG
+
+# 登录鉴权配置
+app:
+  auth:
+    # SM4 密钥：环境变量 AUTH_SM4_KEY，32 位 hex（openssl rand -hex 16 生成）或 16 字符的字符串
+    # 不设默认值——密钥不入库不入 git，未配置时应用启动直接失败
+    sm4-key: ${AUTH_SM4_KEY:e93bfdcde5a022e9d4ca7c372d30b2ba}
+    # token 有效期（分钟），0 表示永不过期
+    token-expire-minutes: 30
+    # 未登录用户（按 IP）最多可调用业务接口的次数
+    anonymous-limit: 5
+    # 内置账号（启动时自动建表 t_user 并写入，不做注册功能）；已存在的账号不会被覆盖
+    users:
+      - username: liushuguang
+        password: "liu1223602478.00"
