@@ -361,3 +361,6 @@ Multi-Agent 的Agent节点如果既调 LLM 又执行工具，会导致：
 ## 十一、作者
 
 - GitHub: [@shuguang-liu](https://github.com/shuguang-liu)
+## 相关文章
+
+- [我用 LangGraph4j 实现 Multi-Agent Supervisor](https://juejin.cn/post/7688018731445075977)
