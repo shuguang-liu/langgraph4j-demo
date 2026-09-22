@@ -1,8 +1,11 @@
 package com.example.langgraph4jdemo.tools;
 
+import com.example.langgraph4jdemo.service.MockService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,7 +14,11 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class CustomerServiceTools {
+
+    @Autowired
+    private final MockService mockService;
 
     @Tool(description = "根据订单号查询订单状态，返回订单金额、状态、下单时间")
     public String queryOrder(@ToolParam(description = "订单号， 格式 ORD+8位数字") String orderNo){
@@ -34,6 +41,11 @@ public class CustomerServiceTools {
             @ToolParam(description = "工单类型：refund-退款, complaint-投诉") String type,
             @ToolParam(description = "问题描述") String description) {
         return String.format("工单已创建：订单 %s，类型 %s，问题：%s", orderNo, type, description);
+    }
+
+    @Tool(description = "数据统计、报表")
+    public String statistics(){
+        return mockService.orderStats();
     }
 
 }

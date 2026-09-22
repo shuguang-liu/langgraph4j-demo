@@ -108,7 +108,7 @@ public class MultiAgentConfig {
             // 直接调 RAG 服务，拿完整回答
             String answer;
             try {
-                String url = "http://127.0.0.1:19092/api/chat/ordinaryAsk?question="
+                String url = "http://127.0.0.1:19092/api/chat/ask?question="
                         + URLEncoder.encode(question, StandardCharsets.UTF_8);
                 answer = restTemplate.getForObject(url, String.class);
                 System.out.println("[tech_expert] RAG 返回: "
@@ -125,8 +125,37 @@ public class MultiAgentConfig {
     }
 
     @Bean
-    public NodeAction<MultiAgentState> dataExpertNode(@Qualifier("dataChatClient") ChatClient chatClient, CustomerServiceTools tools){
-        return buildExpertNode(chatClient, tools, "data_expert");
+    public NodeAction<MultiAgentState> dataExpertNode(@Qualifier("dataChatClient") ChatClient chatClient, RestTemplate restTemplate){
+        return multiAgentState -> {
+            System.out.println("[data_expert] 查询统计数据...");
+            List<Message> messages = multiAgentState.message();
+            String question = messages.stream()
+                    .filter(m -> m instanceof UserMessage)
+                    .reduce((a, b) -> b)
+                    .map(Message::getText)
+                    .orElse("");
+
+            // 调统计接口
+            String stats;
+            try {
+                stats = restTemplate.getForObject(
+                        "http://127.0.0.1:19092/api/stats/orders",
+                        String.class);
+            } catch (Exception e) {
+                stats = "统计服务暂时不可用";
+            }
+
+            // LLM 总结
+            String answer = chatClient.prompt()
+                    .system("你是数据分析师，基于提供的统计数据生成简洁的报表总结。")
+                    .user("数据：\n" + stats + "\n\n用户问题：" + question)
+                    .call()
+                    .content();
+
+            List<Message> newMessages = new ArrayList<>(messages);
+            newMessages.add(new AssistantMessage(answer));
+            return Map.of("message", newMessages);
+        };
     }
 
     @Bean

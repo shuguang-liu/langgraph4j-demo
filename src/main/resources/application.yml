@@ -2,7 +2,7 @@ spring:
   application:
     name: langgraph4j-demo
   profiles:
-    active: dev
+    active: prod
 server:
   port: 19091
   address: 0.0.0.0

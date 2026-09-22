@@ -38,7 +38,18 @@ const listEl = ref(null)
 
 const inputDisabled = computed(() => sending.value || !!pending[activeKey.value])
 
-onMounted(scrollBottom)
+onMounted(() => {
+  scrollBottom()
+  autoDemo()
+})
+
+// 游客进入且还没有对话记录时，自动演示一次"你是谁"（消耗 1 次游客额度）；
+// 有历史记录则不重复演示（刷新不会反复浪费额度），清空对话后会重新演示
+function autoDemo() {
+  if (isLoggedIn() || sending.value) return
+  if (history.multi.length > 0) return
+  send('你是谁')
+}
 
 function switchAgent(key) {
   activeKey.value = key
